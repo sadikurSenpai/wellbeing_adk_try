@@ -6,7 +6,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-from service.retrieval.retrieve_user_data import get_user_data
+from app.service.user_profile.user_service import get_user_profile
 
 _template_cache = None
 
