@@ -15,6 +15,15 @@ def load_chat_instruction(user_id: str):
     with open(prompt_path, 'r', encoding='utf-8') as f:
         template = Template(f.read())
         user_profile = get_user_data(user_id)
+        
+        if not user_profile:
+            user_profile = {
+                "name": "Unknown",
+                "age": "Unknown",
+                "sex": "Unknown",
+                # Add other fields if your template expects them
+            }
+            
         instruction_text = template.render(user_profile = user_profile)
     return instruction_text
 
