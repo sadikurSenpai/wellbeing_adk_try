@@ -1,3 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Environment Variables
 .env
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# System
+.DS_Store
+Thumbs.db
+
 cli_runner.py
 test_chat.py
+test_ingestion.py
