@@ -1,0 +1,8 @@
+google-adk
+langchain
+dotenv
+langchain-openai
+langchain-community
+litellm
+pydantic
+python-dotenv
