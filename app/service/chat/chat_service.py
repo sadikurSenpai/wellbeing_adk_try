@@ -3,12 +3,12 @@ from typing import AsyncGenerator, Optional
 from google.adk import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai.types import Content, Part
-from app.revise_agent.agent import get_agent
+from app.chatting_agent.agent import get_agent
 
 # Global session service (in-memory)
 # We instantiate it once so it persists across requests in memory
 session_service = InMemorySessionService()
-APP_NAME = "revise_agent"
+APP_NAME = "chatting_agent"
 
 async def get_or_create_session(user_id: str, session_id: Optional[str] = None) -> str:
     """
