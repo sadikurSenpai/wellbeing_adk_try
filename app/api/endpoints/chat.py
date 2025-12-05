@@ -16,8 +16,12 @@ async def chat_endpoint(request: ChatRequest):
                 message=request.message,
                 session_id=session_id
             ),
-            media_type="text/plain",
-            headers={"X-Session-ID": session_id}
+            media_type="text/event-stream",
+            headers={
+                "X-Session-ID": session_id,
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+            }
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

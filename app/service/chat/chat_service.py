@@ -15,12 +15,8 @@ async def get_or_create_session(user_id: str, session_id: Optional[str] = None) 
     Retrieves an existing session ID or creates a new one.
     """
     if session_id:
-        # In a real DB-backed service, we might verify existence here.
-        # For InMemory, we assume the client provided a valid ID from a previous response.
-        # If it's invalid, the runner might error out, which we can handle.
         return session_id
     
-    # Create new session
     new_session = await session_service.create_session(
         app_name=APP_NAME,
         user_id=user_id,
@@ -32,7 +28,7 @@ async def generate_chat_stream(user_id: str, message: str, session_id: str) -> A
     Generates a stream of responses from the agent for the given session.
     """
     runner = Runner(
-        agent=get_agent(user_id), 
+        agent=await get_agent(user_id, message, session_id), 
         app_name=APP_NAME, 
         session_service=session_service
     )
@@ -40,19 +36,30 @@ async def generate_chat_stream(user_id: str, message: str, session_id: str) -> A
     user_msg = Content(role="user", parts=[Part(text=message)])
 
     try:
-        async for event in runner.run_async(user_id=user_id, session_id=session_id, new_message=user_msg):
-            # Handle streaming content (deltas)
+        # Attempt to pass stream=True to run_async
+        async for event in runner.run_async(user_id=user_id, session_id=session_id, new_message=user_msg, stream=True):
             if hasattr(event, 'content') and event.content:
-                # Check for parts with text in the content
                 if hasattr(event.content, 'parts'):
                     for part in event.content.parts:
                         if hasattr(part, 'text') and part.text:
                             yield part.text
-                # Fallback for simple string content
+                            await asyncio.sleep(0)
                 elif isinstance(event.content, str):
                     yield event.content
+                    await asyncio.sleep(0)
+    except TypeError:
+        # Fallback if stream=True is not accepted by run_async
+        print("DEBUG: run_async does not accept stream=True, falling back")
+        async for event in runner.run_async(user_id=user_id, session_id=session_id, new_message=user_msg):
+             if hasattr(event, 'content') and event.content:
+                if hasattr(event.content, 'parts'):
+                    for part in event.content.parts:
+                        if hasattr(part, 'text') and part.text:
+                            yield part.text
+                            await asyncio.sleep(0)
+                elif isinstance(event.content, str):
+                    yield event.content
+                    await asyncio.sleep(0)
     except Exception as e:
-        # In a stream, we can't raise HTTP exception easily once started, 
-        # so we might yield an error message or log it.
-        # For now, let's yield a generic error message so the user sees something went wrong.
+        print(f"DEBUG: Error in stream: {e}")
         yield f"\n[Error: {str(e)}]"
